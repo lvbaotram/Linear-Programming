@@ -1,6 +1,6 @@
 import sympy as sp
 import numpy as np
-import streamlit as st
+
 # -*- coding: utf-8 -*-
 # Định nghĩa class Position
 from rich.console import Console
@@ -9,94 +9,62 @@ EPS = 1e-4
 def reset_global_state():
     global GLOBAL_STATE
     GLOBAL_STATE = {}
-
+GLOBAL_STATE = {}
 class Position:
     def __init__(self, row, column):
         self.row = row
         self.column = column
-
 def ReadEquation():
-    # Nhập số lượng ràng buộc (n) và biến (m)
-    n = st.number_input("Nhập số lượng ràng buộc (n):", min_value=1, step=1)
-    m = st.number_input("Nhập số lượng biến (m):", min_value=1, step=1)
-    
-    # Nhập hệ số của các biến trong các ràng buộc
+    n, m = map(int, input().split())
     a = []
-    st.write("Nhập hệ số của các biến trong các ràng buộc, cách nhau bằng dấu cách:")
-    for row in range(int(n)):
-        row_input = st.text_input(f"Ràng buộc {row + 1}:", key=f"constraint_{row}")
-        if row_input:
-            a.append(list(map(float, row_input.split())))
-    
-    # Nhập hệ số sau toán tử ràng buộc
-    b_input = st.text_area("Nhập hệ số sau toán tử ràng buộc, cách nhau bằng dấu cách:")
-    b = list(map(float, b_input.split())) if b_input else []
-
-    # Nhập hệ số của hàm mục tiêu
-    c_input = st.text_area("Nhập hệ số của hàm mục tiêu, cách nhau bằng dấu cách:")
-    c = list(map(float, c_input.split())) if c_input else []
-
-    # Kiểm tra đầu vào
-    if len(a) != n or any(len(row) != m for row in a) or len(b) != n or len(c) != m:
-        st.error("Vui lòng nhập đúng số lượng ràng buộc và hệ số.")
-    else:
-        return a, b, c, n, m
+    for row in range(n):
+        a.append(list(map(float, input().split())))
+    b = list(map(float, input().split()))
+    c = list(map(float, input().split()))
+    return a, b, c, n, m
 
 def InputObjectiveFunction():
-    m = st.number_input("Nhập số lượng biến của hàm mục tiêu: ")
-    st.write("Nhập hệ số của các biến trong hàm mục tiêu:")
+    m = int(input("Nhập số lượng biến của hàm mục tiêu: "))
+    print("Nhập hệ số của các biến trong hàm mục tiêu:")
     c = []
-    if m is not None and m > 0:
-        for i in range(int(m)):
-            coefficient = float(st.text_input(f"Nhập hệ số của x{i+1}: "))
-            c.append(coefficient)
-    else:
-        st.error("Số lượng biến phải là một số nguyên dương.")
+    for i in range(m):
+        coefficient = float(input(f"Nhập hệ số của x{i+1}: "))
+        c.append(coefficient)
     return m, c
 
 def InputConstraints():
-    n = st.number_input("Nhập số lượng ràng buộc:")
+    print("Nhập số lượng ràng buộc:")
+    n = int(input("Nhập số lượng ràng buộc:"))
     a = []
     b = []
     operators = []
-    st.write("Nhập ràng buộc:")
-    if n is not None and n > 0:
-        for i in range(int(n)):
-            constraint = []
-            st.write(f"Nhập hệ số của các biến trong ràng buộc thứ {i+1}:")
-            for j in range(m):  # Assuming 'm' is defined globally
-                coefficient = float(st.text_input(f"Nhập hệ số của x{j+1}: "))
-                constraint.append(coefficient)
-            a.append(constraint)
-            operator = st.text_input("Nhập toán tử ràng buộc (>=, <=, =): ")
-            operators.append(operator)
-            value = float(st.text_input("Nhập hệ số sau toán tử ràng buộc: "))
-            b.append(value)
-    else:
-        st.error("Số lượng ràng buộc phải là một số nguyên dương.")
+    print("Nhập ràng buộc:")
+    for i in range(n):
+        constraint = []
+        print(f"Nhập hệ số của các biến trong ràng buộc thứ {i+1}:")
+        for j in range(m):
+            coefficient = float(input(f"Nhập hệ số của x{j+1}: "))
+            constraint.append(coefficient)
+        a.append(constraint)
+        print(a)
+        operator = input("Nhập toán tử ràng buộc (>=, <=, =): ")
+        operators.append(operator)
+        print(operators)
+        value = float(input("Nhập hệ số sau toán tử ràng buộc: "))
+        b.append(value)
+        print(b)
     return n, a, operators, b
 
-
 def InputProblemType():
-    problem_type = st.text_input("Bạn muốn tìm max hay min (max/min): ")
+    problem_type = input("Bạn muốn tìm max hay min (max/min): ")
     return problem_type
-
 def InputObjectiveFunctionConditions(m):
     conditions = []
-    if m is not None and m > 0:
-        for i in range(int(m)):
-            condition = st.text_input(f"Nhập điều kiện của x{i+1} (<= 0, >= 0, tùy ý): ")
-            conditions.append(condition)
-    else:
-        st.error("Số lượng biến của hàm mục tiêu phải là một số nguyên dương.")
+    for i in range(m):
+        condition = input(f"Nhập điều kiện của x{i+1} (<= 0, >= 0, tùy ý): ")
+        conditions.append(condition)
     return conditions
 def PrintObjectiveFunction(c, problem_type):
-    global GLOBAL_STATE
-    GLOBAL_STATE = {"c": None}
-
-    if m is None or c is None:
-        st.error("Số lượng biến không được để trống.")
-        return
     print("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓")
     print(" Tìm giá trị", end=" ",)
     if problem_type == "max":
@@ -123,21 +91,23 @@ def PrintConstraints(a, operators, b, conditions):
     print("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 
 def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions):
-    print("Bài toán sau khi chuyển đổi:")
+    print("Bài toán có sau khi chuyển đổi:")
     new_c = []
     new_a = []
     new_b = []
     new_conditions = []
-
     print("Hàm mục tiêu sau khi chuyển đổi:")
     print("z =", end=" ")
-
+   
     for i in range(len(c)):
+     
         if conditions[i] == "<= 0":
             new_conditions.append(conditions[i])
             new_c.append(-c[i])
             if problem_type == "max":
-                new_c[i] = -new_c[i]
+               new_c[i] = -new_c[i]
+            else:
+               new_c[i] = new_c[i]
             print(f"-{c[i]}x{i+1}", end="")
         elif conditions[i] == "tùy ý":
             new_conditions.append(conditions[i])
@@ -145,29 +115,28 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
             new_c.append(c[i])
             new_c.append(-c[i])
             if problem_type == "max":
-                new_c[i] = -new_c[i]
+               new_c[i] = -new_c[i]
+            else:
+               new_c[i] = new_c[i]
             print(f"{new_c[i]}x{i+1} - {new_c[i]}x{i+1}_t", end="")
         elif conditions[i] == ">= 0":
             new_conditions.append(conditions[i])
             new_c.append(c[i])
             if problem_type == "max":
-                new_c[i] = -new_c[i]
+               new_c[i] = -new_c[i]
+            else:
+               new_c[i] = new_c[i]
             print(f"{c[i]}x{i+1}", end="")
-        else:
-            raise ValueError(f"Toán tử '{operators[i]}' trong ràng buộc không hợp lệ.")
         if i < len(c) - 1:
             print(" +", end=" ")
     print()
-
     result_strings = []
     print("Thỏa mãn các ràng buộc sau:")
-
-    for i in range(int(n)):
+    for i in range(n):
         new_constraint = ""
         new_constraint_1 = ""
         temp_constraint = []
-
-        for j in range(int(m)):
+        for j in range(m):
             if conditions[j] == "<= 0":
                 temp_constraint.append(-a[i][j])  # Đảo dấu của hệ số
                 if -a[i][j] > 0 and -a[i][j] != a[i][0]:
@@ -190,15 +159,13 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
                     new_constraint += f" + {a[i][j]}x{j+1}"
                 else:
                     new_constraint += f" -{a[i][j]}x{j+1}"
-
         new_a.append(temp_constraint)
-
-        if operators[i] == ">=":
+        # Append temp_constraint to new_a
+        if operators[i] == ">=":  
             new_a[i] = [-coeff for coeff in new_a[i]]  # Đảo dấu của từng phần tử trong danh sách new_a
             new_constraint += f" <= {-b[i]}"
             new_b.append(-b[i])
         elif operators[i] == "=":
-            new_a.append([-coeff for coeff in temp_constraint])  # Negate the constraint
             for j in range(m):
                 if conditions[j] == "<= 0":
                     new_constraint_1 += f" {-temp_constraint[j]}x{j+1}"
@@ -208,32 +175,34 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
                 else:
                     new_constraint_1 += f" {-temp_constraint[j]}x{j+1}"
             new_constraint_1 += f" <= {-b[i]}"
-            new_b.append(-b[i])
+            new_b.append(b[i])
+            new_a.append([-coeff for coeff in temp_constraint])
             new_constraint = ""
-            for j in range(int(m)):
+            for j in range(m):
                 if conditions[j] == "<= 0":
-                    new_constraint += f" {temp_constraint[j]}x{j+1}"
+                    new_constraint_1 += f" {temp_constraint[j]}x{j+1}"
                 elif conditions[j] == "tùy ý":
                     current_variable = temp_constraint[j]
                     new_constraint += f" {current_variable}x{j+1} - {current_variable}x{j+1}_t"
                 else:
                     new_constraint += f" {temp_constraint[j]}x{j+1}"
             new_constraint += f" <= {b[i]}"
-            new_b.append(b[i])
+            new_b.append(-b[i])
         elif operators[i] == "<=":
             new_constraint += f" <= {b[i]}"
             new_a[i] = [coeff for coeff in new_a[i]]
             new_b.append(b[i])
-
         result_strings.append(new_constraint_1.strip())
         result_strings.append(new_constraint.strip())
-
+   
     for constraint in result_strings:
         print(constraint)
 
-    # Xóa các dòng trong a có số lượng phần tử khác với len(new_c)
+
+    # Xóa các dòng trong a có số lượng phần tử khác với new_m
     new_a = [row for row in new_a if len(row) == len(new_c)]
     return new_a, new_b, new_c, len(new_b), len(new_c), new_conditions
+
 
 def convert_to_equations(a, b, c, n, m, conditions):
     print("Lập từ vựng xuất phát:")
@@ -300,7 +269,7 @@ def convert_to_phase1_form_x0(a, b, c, n, m):
     variables = ['x{}'.format(i + 1) for i in range(m)] + ['w{}'.format(i + 1) for i in range(n)] + ['x0'] + ['const.']
 
     # Thêm hàng cho mỗi ràng buộc và biến cơ sở
-    for i in range(int(n)):
+    for i in range(n):
         slack_variables = [0] * (n + m + 1)
         slack_variables[m + i] = 1.0
         tableau_row = [-x for x in a[i]] + slack_variables[:n + m] + [b[i]]
@@ -319,7 +288,7 @@ def convert_to_equations_x0(a, b, c, n, m, conditions):
     print("Lập từ vựng xuất phát:")
     def print_objective_function():
         print("E =", end=" ")
-        for i in range(int(m -1)):
+        for i in range(m -1):
             if conditions[i] == "tùy ý":
                 print(f"{c[i]}*x{i+1} - {c[i]}*x{i+1}_t", end=" ")
             else:
@@ -356,7 +325,7 @@ def convert_to_equations_x0(a, b, c, n, m, conditions):
 def CreateTableau_x0(a, b, c, n, m):
     tableau = []
     c = [0.0] * m  + [0.0] * n +  [1.0]
-    for i in range(int(n)):
+    for i in range(n):
         slack_variables = [0] * n
         slack_variables[i] = 1.0
         tableau_row = [-x for x in a[i]] + slack_variables + [1] + [b[i]]  # Chỉnh sửa giá trị của cột x0 thành 1
@@ -394,7 +363,7 @@ def print_tableau_x0(tableau, m, n, conditions):
 
 
     # Thêm các biến slack vào danh sách biến
-    for i in range(int(n)):
+    for i in range(n):
         variables.append('w{}'.format(i + 1))
     # Thêm biến x0 vào danh sách biến
     variables.append('x0')
@@ -461,7 +430,7 @@ def ProcessPivotElement_x0(tableau, pivot_element):
 
 def CreateTableau(a, b, c, n, m):
     tableau = []
-    for i in range(int(n)):
+    for i in range(n):
         slack_variables = [0] * n
         slack_variables[i] = 1.0
         tableau_row = [-x for x in a[i]] + slack_variables + [b[i]]
@@ -479,7 +448,7 @@ def print_tableau(tableau, n, m, conditions):
     variables = []
     variable_index = 1
     is_last_arbitrary = False
-    for i in range(int(m)):
+    for i in range(m):
         if conditions[i] == "tùy ý":
             if not is_last_arbitrary:
                 variables.append('x{}'.format(variable_index))
@@ -494,7 +463,7 @@ def print_tableau(tableau, n, m, conditions):
             is_last_arbitrary = False
 
     # Thêm các biến w và hằng số vào danh sách biến
-    for i in range(int(n)):
+    for i in range(n):
         variables.append('w{}'.format(i + 1))
     variables.append('const.')
     
@@ -576,9 +545,6 @@ def ProcessPivotElement(a, pivot_element):
            a[i][pivot_element.column] = 0.0            
     return a
 def print_phase1_problem(a, b, current_c, n, m):
-    if current_c is None:
-        st.error("Hệ số của biến mục tiêu không được để trống.")
-        return
     print("Bài toán đã chuyển đổi:")
     print("Hàm mục tiêu sau khi chuyển đổi:")
     print("z =", " + ".join([f"{current_c[i]}x{i+1}" for i in range(len(current_c))]), "+ x0") # Thêm biến x0 vào hàm mục tiêu
@@ -777,11 +743,7 @@ conditions= InputObjectiveFunctionConditions(m)
 PrintObjectiveFunction(c, problem_type)
 PrintConstraints(a, operators, b,conditions)
 a, b, c, n, m,conditions  = convert_to_standard_form(a, b, c, n, m, problem_type, operators,conditions)
-current_c = None
-if n is not None and n > 0:
-    current_c = [0.0] * (1) + [0.0] * (n - 1)
-else:
-    st.error("Số lượng ràng buộc phải là một số nguyên dương.")
+current_c  =  [0.0] * (1) +[0.0] * (n - 1) 
 print_phase1_problem(a, b, current_c, n, m)
  # Chuyển đổi sang dạng bài toán bổ trợ
 tableau, num_variables = convert_to_phase1_form_x0(a, b, c, n, m)
