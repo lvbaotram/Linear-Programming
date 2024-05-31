@@ -287,12 +287,9 @@ def print_tableau(tableau, m, n, conditions):
         variables.append('w{}'.format(i + 1))
     variables.append('const.')
     
-   # Xác định giới hạn tối đa cho chiều rộng của bảng (ví dụ: 80 ký tự)
-    max_table_width = 80
-
-# Thêm các cột cho biến và hằng số vào bảng Rich với chiều rộng tối đa
+    # Thêm các cột cho biến và hằng số vào bảng Rich
     for variable in variables:
-        table.add_column(variable, justify="right", width=max_table_width // len(variables))
+        table.add_column(variable)
     # Thêm hàng vào bảng Rich
     for row in tableau:
         table.add_row(*["{:.2f}".format(cell) for cell in row])
