@@ -86,9 +86,9 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
     new_conditions = []
     print("Hàm mục tiêu sau khi chuyển đổi:")
     print("z =", end=" ")
-    
+   
     for i in range(len(c)):
-      
+     
         if conditions[i] == "<= 0":
             new_conditions.append(conditions[i])
             new_c.append(-c[i])
@@ -99,7 +99,7 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
             print(f"-{c[i]}x{i+1}", end="")
         elif conditions[i] == "tùy ý":
             new_conditions.append(conditions[i])
-            new_conditions.append(conditions[i]) 
+            new_conditions.append(conditions[i])
             new_c.append(c[i])
             new_c.append(-c[i])
             if problem_type == "max":
@@ -111,9 +111,9 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
             new_conditions.append(conditions[i])
             new_c.append(c[i])
             if problem_type == "max":
-              new_c[i] = -new_c[i]
+               new_c[i] = -new_c[i]
             else:
-              new_c[i] = new_c[i]
+               new_c[i] = new_c[i]
             print(f"{c[i]}x{i+1}", end="")
         if i < len(c) - 1:
             print(" +", end=" ")
@@ -147,14 +147,13 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
                     new_constraint += f" + {a[i][j]}x{j+1}"
                 else:
                     new_constraint += f" -{a[i][j]}x{j+1}"
-        new_a.append(temp_constraint) 
+        new_a.append(temp_constraint)
         # Append temp_constraint to new_a
-        if operators[i] == ">=":   
+        if operators[i] == ">=":  
             new_a[i] = [-coeff for coeff in new_a[i]]  # Đảo dấu của từng phần tử trong danh sách new_a
             new_constraint += f" <= {-b[i]}"
             new_b.append(-b[i])
         elif operators[i] == "=":
-            new_a.append([-coeff for coeff in temp_constraint])  # Negate the constraint
             for j in range(m):
                 if conditions[j] == "<= 0":
                     new_constraint_1 += f" {-temp_constraint[j]}x{j+1}"
@@ -164,7 +163,8 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
                 else:
                     new_constraint_1 += f" {-temp_constraint[j]}x{j+1}"
             new_constraint_1 += f" <= {-b[i]}"
-            new_b.append(-b[i])
+            new_b.append(b[i])
+            new_a.append([-coeff for coeff in temp_constraint])
             new_constraint = ""
             for j in range(m):
                 if conditions[j] == "<= 0":
@@ -175,20 +175,22 @@ def convert_to_standard_form(a, b, c, n, m, problem_type, operators, conditions)
                 else:
                     new_constraint += f" {temp_constraint[j]}x{j+1}"
             new_constraint += f" <= {b[i]}"
-            new_b.append(b[i])
+            new_b.append(-b[i])
         elif operators[i] == "<=":
             new_constraint += f" <= {b[i]}"
-            new_a[i] = [coeff for coeff in new_a[i]] 
+            new_a[i] = [coeff for coeff in new_a[i]]
             new_b.append(b[i])
         result_strings.append(new_constraint_1.strip())
         result_strings.append(new_constraint.strip())
-    print(new_c)
+   
     for constraint in result_strings:
         print(constraint)
+
 
     # Xóa các dòng trong a có số lượng phần tử khác với new_m
     new_a = [row for row in new_a if len(row) == len(new_c)]
     return new_a, new_b, new_c, len(new_b), len(new_c), new_conditions
+
 
 def convert_to_equations(a, b, c, n, m, conditions):
     print("Lập từ vựng xuất phát:")
